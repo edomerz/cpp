@@ -1,0 +1,61 @@
+#include <iostream>
+
+struct X
+{
+	explicit X(); //init function without parameters is called default constructor
+	explicit X(int a_, int b_ = 8); // regular Ctor
+	
+	~X(); // deintialization function, named destructor
+	
+	X(const X& other_); //copy init function called copy constructor or CCtor
+	
+	X& operator = (const X& other_); // assignment operator
+	
+	int m_a;
+	int m_b;
+};
+
+x::x() : m_a(3), m_b(4) // implemenattion of default Ctor
+{
+	std::cout << "this:" << this << "	x default Ctor. m_a:" << m_a << "m_b:" << m_b << std::endl; 
+}
+
+x::x(int a_, int b_): m_a(a_), m_b(b_) // non default Ctor
+{
+	std::cout <<"this:" << this <<" x int int Ctor. m_a:" << m_a << "m_b:" << m_b << std::endl;
+}
+
+x& x::operator = (const x& other_)
+{
+	m_a = other_.m_a;
+	m_b = other_.m_b;
+	
+	std::cout << "this:" << this << "	x assignment operator. m_a:" << m_a << " m_b:" << m_b << std::endl;
+	
+	return *this;
+}
+
+x:: ~x()
+{
+	std::cout << "this:" << this << "	x Dtor. m_a:" << m_a << " m_b:" << m_b << std::endl;
+}
+
+int main()
+{
+	X x1;
+	
+	X x2(7);
+	
+	X * px = new X(x2);
+	
+	X x3(9, 10);;
+	
+	X x4(x1);
+	
+	x1 = x3;
+	
+	delete px;
+	px = 0;
+	
+	return 0;
+}

@@ -1,0 +1,13 @@
+CC=gcc
+CFLAGS=-g -std=c89 -ansi -Wall -Werror -pedantic -D_DEBUG -I .
+DEPS = 
+OBJ = q14_test_c.o
+
+all: q14_test_c
+
+%.o: %.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+q14_test_c: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
+
