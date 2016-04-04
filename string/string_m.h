@@ -19,7 +19,6 @@ class String;
 
 std::ostream& operator<<(std::ostream& out, const String& other_);
 bool operator==(const String& this_, const String& other_);
-//std::istream& operator>>(std::istream& in, const String& other_);
 
 class String
 {
@@ -35,8 +34,6 @@ class String
 	char *m_str;
 
 public:
-	//non explicit because of
-	// String s1 = "hello"; // we initialize
 	String(const char *string_ = "");
 	~String();
 
@@ -45,14 +42,8 @@ public:
 	// Assignment
 	String& operator=(const String& other_);
 
-	// position
-	// does not change the data member itself
-	// but what it points to, hence, it is not const
 	char& operator[](size_t pos_);
-	// overloading. for use with literals
 	const char& operator[](size_t pos_) const;
-	// the above can be implemented
-	// char operator[](size_t pos_) const;
 
 	// member function: length
 	size_t Length() const;

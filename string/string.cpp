@@ -7,11 +7,6 @@ namespace ilrd
 String::String(const char *str)
 {
 	Create(m_str, str);
-//	size_t len(strlen(str));
-//	m_str = new char(len + 1);
-//	memcpy(m_str, str, len + 1);
-
-//	std::cout<<"size of str: "<<len<<"\nstr: "<<str<<"\nm_str: "<< m_str<<"\n";
 }
 
 String::~String()
@@ -23,10 +18,6 @@ String::~String()
 String::String(const String& other_)
 {
 	Create(m_str, other_.m_str);
-//	size_t len(strlen(other_.m_str));
-//	m_str = new char(len + 1);
-//	memcpy(m_str, other_.m_str, len + 1);
-//	std::cout<<"CCtor\n";
 }
 
 String& String::operator=(const String& other_)
@@ -37,9 +28,7 @@ String& String::operator=(const String& other_)
 	}
 	delete[] m_str;
 	Create(m_str, other_.m_str);
-//	m_str = new char(strlen(other_.m_str) + 1);
-//	memcpy(m_str, other_.m_str, (strlen(other_.m_str) + 1));
-//	std::cout<<"=: m_str: "<<m_str<<'\n';
+
 	return *this;
 }
 
