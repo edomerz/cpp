@@ -1,12 +1,12 @@
-
+#include <cassert>
 #include "string_m.h"
 
 namespace ilrd
 {
 // non default Ctor
-String::String(const char *str)
+String::String(const char *str): m_str(Create(str))
 {
-	Create(m_str, str);
+
 }
 
 String::~String()
@@ -15,30 +15,32 @@ String::~String()
 }
 
 //CCtor
-String::String(const String& other_)
+String::String(const String& other_): m_str(Create(other_.m_str))
 {
-	Create(m_str, other_.m_str);
+
 }
 
 String& String::operator=(const String& other_)
 {
-	if(*this == other_)
+	if(this == &other_) // checks for self assignment
 	{
 		return *this;
 	}
 	delete[] m_str;
-	Create(m_str, other_.m_str);
+	m_str = Create(other_.m_str);
 
 	return *this;
 }
 
 char& String::operator[](size_t pos_)
 {
+	assert(pos_  < Length());
 	return(m_str[pos_]);
 }
 
 const char& String::operator[](size_t pos_) const
 {
+	assert( pos_ < Length());
 	return(m_str[pos_]);
 }
 

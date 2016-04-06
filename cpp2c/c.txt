@@ -1,0 +1,46 @@
+AnimalCtor(): 1
+CentipedeCtor()
+Centipede::Display() ID: 1  num legs: 46
+AnimalCtor(): 2
+CentipedeCtor()
+Foo(int i)
+Centipede::Display() ID: 2  num legs: 46
+AnimalCctor(): 3
+AnimalDtor() 2
+CentipedeDtor
+Animal::Display() : 3
+AnimalDtor() 3
+*************FiFi*************
+AnimalCctor(): 2
+CentipedeCctor()
+Centipede::Display() ID: 2  num legs: 46
+AnimalDtor() 2
+CentipedeDtor
+**************Animal *array************
+AnimalCtor(): 2
+CentipedeCtor()
+AnimalCtor(): 3
+SquirlCtor
+AnimalCtor(): 4
+CentipedeCtor()
+Centipede::Display() ID: 2  num legs: 46
+Squirl::Display() ID:3
+Centipede::Display() ID: 4  num legs: 46
+AnimalDtor() 2
+CentipedeDtor
+AnimalDtor() 3
+SquirlDtor
+AnimalDtor() 4
+CentipedeDtor
+**************Animal arr2************
+AnimalCtor(): 2
+CentipedeCtor()
+AnimalCctor(): 3
+AnimalCtor(): 4
+SquirlCtor
+AnimalCctor(): 5
+AnimalCtor(): 6
+AnimalDtor() 5
+SquirlDtor
+AnimalDtor() 3
+CentipedeDtor

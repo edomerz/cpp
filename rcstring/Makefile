@@ -1,12 +1,12 @@
-CC=g++
+CC=clang++
 CFLAGS=-g -std=c++98 -Wall -Werror -pedantic -D_DEBUG -I .
-DEPS = 
-OBJ = string.o string_test.o
+DEPS = rcstring.h
+OBJ = rcstring.o rcstring_test.o
 
-all: string_test
+all: rcstring_test
 
 %.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-string_test: $(OBJ)
+rcstring_test: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)

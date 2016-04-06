@@ -1,21 +1,19 @@
 /****************************************************************************
-	string
+	rcstring
 AUTHOR: omer ido                                                   
-CREATE DATE: 03/04/16                                              			
+CREATE DATE: 06/04/16                                              			
 DESCRIPTION: 
 **************************************************************************/
-#ifndef __STRING_H__
-#define __STRING_H__
+#ifndef __RCSTRING_H__
+#define __RCSTRING_H__
 
 #include <iostream> 
-#include <cstring>
 
 
 namespace ilrd
 {
 
-
-class String;
+class rcString;
 
 std::ostream& operator<<(std::ostream& out, const String& other_);
 bool operator==(const String& this_, const String& other_);
@@ -52,13 +50,5 @@ public:
 };
 
 }
-	
-#endif /* ifndef __STRING_H__*/
-// another implementation for create, mine
-//void Create(char *&m_str, const char *o_str)
-//{
-//	size_t len = strlen(o_str);
-//	m_str = new char[len + 1];
-//	memcpy(m_str,o_str, len);
-//	m_str[len] = '\0';
-//}
+
+#endif /* ifndef __RCSTRING_H__*/

@@ -1,0 +1,104 @@
+Animal::Ctor()1
+Centipede::Ctor()
+
+Centipede::Display() ID:1  num legs:46
+
+Animal::Ctor()2
+Centipede::Ctor()
+
+Foo(int i)
+
+Centipede::Display() ID:2  num legs:46
+
+Animal::CCtor() 3
+Centipede::dtor()
+Animal::Dtor()2
+
+Animal::Display() : 3  // Foo(3).Display();
+Animal::Dtor()3
+
+Animal::CCtor() 2 		// FiFi(c);
+Centipede::CCtor()
+
+Centipede::Display() ID:2  num legs:46
+
+Centipede::dtor()
+Animal::Dtor()2
+// end FiFi(c);
+
+
+Animal::Ctor()2				// Animal *array[] =
+Centipede::Ctor()
+
+Animal::Ctor()3
+Squirl::Ctor()
+
+Animal::Ctor()4
+Centipede::Ctor()
+
+Centipede::Display() ID:2  num legs:46
+
+Squirl::Display() ID:3
+
+Centipede::Display() ID:4  num legs:46
+
+Centipede::dtor()
+Animal::Dtor()2
+
+Squirl::dtor()
+Animal::Dtor()3
+
+Centipede::dtor()
+Animal::Dtor()4 				// line 173
+
+Animal::Ctor()2
+Centipede::Ctor()
+
+Animal::CCtor() 3
+
+Animal::Ctor()4
+Squirl::Ctor()
+Animal::CCtor() 5
+
+Animal::Ctor()6
+
+Squirl::dtor()
+Animal::Dtor()4
+
+Centipede::dtor()
+Animal::Dtor()2
+
+Animal::Display() : 3
+Animal::Display() : 5
+Animal::Display() : 6
+
+// l 187: Animal::PrintCount();
+s_count: 4
+
+
+Animal::Ctor()5
+Centipede::Ctor()
+s_count: 5
+Animal::Ctor()6
+Squirl::Ctor()
+Animal::Ctor()7
+Squirl::Ctor()
+Animal::Ctor()8
+Squirl::Ctor()
+Animal::Ctor()9
+Squirl::Ctor()
+Squirl::dtor()
+Animal::Dtor()9
+Squirl::dtor()
+Animal::Dtor()8
+Squirl::dtor()
+Animal::Dtor()7
+Squirl::dtor()
+Animal::Dtor()6
+Centipede::dtor()
+Animal::Dtor()5
+Animal::Dtor()6
+Animal::Dtor()5
+Animal::Dtor()3
+Centipede::dtor()
+Animal::Dtor()1
