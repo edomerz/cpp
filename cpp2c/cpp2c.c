@@ -2,21 +2,28 @@
 #include <assert.h>
 #include <stdlib.h>
 
-int s_count = 0;
+/* int animal::s_count = 0 */
+int animal_s_count = 0;
 
 
 typedef struct Animal Animal;
 typedef struct Centipede Centipede;
 typedef struct Squirl Squirl;
+typedef struct LegendaryAnimal LegendaryAnimal;
+
 
 void AnimalDisplay(Animal* this);
 void CentipedeDisplay(Animal* this);
 void SquirlDisplay(Animal* this);
+void
+
 void CentipedeBuyShoes(Animal* this);
+
 
 void AnimalDtor(Animal* this);
 void CentipedeDtor(Centipede* this);
 void SquirlDtor(Squirl* this);
+
 
 typedef struct animal_vtbl
 {
@@ -59,27 +66,30 @@ struct Squirl
 
 void AnimalCtor(Animal* this)
 {
+	++animal_s_count;
 	assert(this);
 	this->vptr = &the_animal_vtbl;
-	++s_count;
 
-	this->m_id = s_count;
+	this->m_id = animal_s_count;
 	printf("AnimalCtor(): %d\n", this->m_id);
 }
 
 void AnimalCctor(Animal* this, Animal* other)
 {
-	assert(this);
-	++s_count;
-	this->m_id = s_count;
-	this->vptr = other->vptr;
+	assert(this); assert(other);
+//	++animal_s_count;
+	this->m_id = ++animal_s_count;
+
+	//this->vptr = other->vptr; // this is a bug we need to prevent slicing
+	this->vptr = &the_animal_vtbl;
 	printf("AnimalCctor(): %d\n", this->m_id);
 }
 
 void AnimalDtor(Animal* this)
 {
 	assert(this);
-	--s_count;
+//	this->vptr = &the_animal_vtbl; // make sure that vtbl is correct
+	--animal_s_count;
 	printf("AnimalDtor() %d\n", this->m_id);
 //	free(this);
 }
@@ -91,7 +101,7 @@ void AnimalDisplay(Animal* this)
 
 void AnimalPrintCount()
 {
-	printf("s_count: %d\n", s_count);
+	printf("animal_s_count: %d\n", animal_s_count);
 }
 
 int AnimalGetID(Animal* this)
@@ -112,6 +122,7 @@ void CentipedeCctor(Centipede* this,  Centipede* other)
 	assert(this); assert(other);
 //	this->a = other->a;
 	AnimalCctor(&(this->a), &(other->a));
+	this->a.vptr = &the_centipede_vtbl; // centipede can be a base class to other class
 	this->m_numLegs = other->m_numLegs;
 	printf("CentipedeCctor()\n");
 }
@@ -129,6 +140,7 @@ void CentipedeBuyShoes(Animal* this)
 
 void CentipedeDtor(Centipede* this)
 {
+	this->a.vptr = &the_animal_vtbl; // return the correct table
 	printf("CentipedeDtor\n");
 	AnimalDtor(&(this->a));
 }
@@ -176,9 +188,11 @@ void Foo_i(int i, Animal* ret_a)
 
 	printf("Foo(int i)\n");
 
-	ret.a.vptr->Display((Animal*)&ret);
+//	ret.a.vptr->Display((Animal*)&ret);// no need for vtbl explicit call to cen display
+	CentipedeDisplay(&ret);
 
 	AnimalCctor(ret_a, (Animal*)&ret);
+
 	CentipedeDtor(&ret);
 }
 
@@ -201,10 +215,10 @@ int main()
 	Foo_ref((Animal*)&c);
 
 	// Foo(3).Display();
-	Centipede tmp1;
-	Foo_i(3, (Animal*)&tmp1);
-	AnimalDisplay((Animal*)&tmp1);
-	AnimalDtor((Animal*)&tmp1);
+	Animal tmp1;
+	Foo_i(3, &tmp1);
+	AnimalDisplay((&tmp1);
+	AnimalDtor((&tmp1);
 
 	//FiFi(c);
 	printf("*************FiFi*************\n");
