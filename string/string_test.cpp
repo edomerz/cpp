@@ -32,4 +32,5 @@ int main(void)
 	std::cout<<"s3[0]: "<<s3[0]<<'\n';
 
 	return(0);
+
 }

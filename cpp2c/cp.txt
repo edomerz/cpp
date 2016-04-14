@@ -51,9 +51,8 @@ Animal::Dtor()3
 Centipede::dtor()
 Animal::Dtor()4 				// line 173
 
-Animal::Ctor()2
+Animal::Ctor()2					// Animal arr2[] =	
 Centipede::Ctor()
-
 Animal::CCtor() 3
 
 Animal::Ctor()4
@@ -78,7 +77,9 @@ s_count: 4
 
 Animal::Ctor()5
 Centipede::Ctor()
+
 s_count: 5
+
 Animal::Ctor()6
 Squirl::Ctor()
 Animal::Ctor()7
@@ -87,6 +88,7 @@ Animal::Ctor()8
 Squirl::Ctor()
 Animal::Ctor()9
 Squirl::Ctor()
+
 Squirl::dtor()
 Animal::Dtor()9
 Squirl::dtor()
@@ -95,10 +97,13 @@ Squirl::dtor()
 Animal::Dtor()7
 Squirl::dtor()
 Animal::Dtor()6
+
 Centipede::dtor()
 Animal::Dtor()5
+
 Animal::Dtor()6
 Animal::Dtor()5
 Animal::Dtor()3
+
 Centipede::dtor()
 Animal::Dtor()1

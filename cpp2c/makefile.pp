@@ -1,5 +1,5 @@
 CC=clang++
-CFLAGS=-g -std=c++98 -Wall -Werror -pedantic -D_DEBUG -I .
+CFLAGS=-g -std=c++98 -Wall -D_DEBUG -I .
 DEPS = 
 OBJ = cpp2c_test.o
 

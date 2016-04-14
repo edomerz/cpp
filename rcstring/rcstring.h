@@ -1,54 +1,92 @@
-/****************************************************************************
-	rcstring
-AUTHOR: omer ido                                                   
-CREATE DATE: 06/04/16                                              			
-DESCRIPTION: 
-**************************************************************************/
 #ifndef __RCSTRING_H__
 #define __RCSTRING_H__
 
-#include <iostream> 
-
+#include "buffer.h"
+#include "proxy.h"
 
 namespace ilrd
 {
 
-class rcString;
+class RCString;
 
-std::ostream& operator<<(std::ostream& out, const String& other_);
-bool operator==(const String& this_, const String& other_);
+std::ostream& operator<<(std::ostream& os, const RCString& string_);
+bool operator==(const RCString& this_, const RCString& other_);
 
-class String
+class RCString
 {
-	friend std::ostream& operator<<(std::ostream& out, const String& str_);
-	friend bool operator==(const String& this_, const String& other_);
-	char* Create(const char *o_str)
-	{
-		size_t len = strlen(o_str);
-		char* str = new char[len + 1];
-		memcpy(str,o_str, len);
-		str[len] = '\0';
-
-		return str;
-	}
-	char *m_str;
+private:
+	struct Buffer;
+	struct Proxy;
 
 public:
-	String(const char *string_ = "");
-	~String();
+	//constructor non-explicit
+	RCString(const char *string_="");
 
-	// copy ctor
-	String(const String& other_);
-	// Assignment
-	String& operator=(const String& other_);
+	// destructor
+	~RCString();
 
-	char& operator[](size_t pos_);
+	//copy behavior
+	// CCtor
+	RCString(const RCString& other_);
+	RCString& operator=(const RCString& other_);
+
+	//string position operator
+	Proxy operator[](size_t pos_);
 	const char& operator[](size_t pos_) const;
 
-	// member function: length
+	//member functions
 	size_t Length() const;
+
+	void SetChar(size_t pos_, const char c);
+	char GetChar(size_t pos_);
+	size_t GetRefCount() const;
+
+private:
+	Buffer *m_buf;
+
+	void IncRefBuf();
+	void DecRefBuf();
+	void SetBuf(Buffer* buf);
+	Buffer* GetBuf();
+
+	//input
+	friend std::ostream& operator<<(std::ostream& os, const RCString& rcstring_);
+	//comparator
+	friend bool operator==(const RCString& this_, const RCString& other_);
 };
 
+struct RCString::Buffer
+{
+	// default ctor
+	Buffer(size_t m_ref_count_ = 1, const char* string_= "");
+	// cctor
+	Buffer(const Buffer& other_);
+	// dtor
+	~Buffer();
+
+	size_t m_ref_count;
+	String m_string;
+};
+
+struct RCString::Proxy
+{
+public:
+	// Ctor
+	Proxy(RCString& rcstring_, size_t pos_);
+
+	// Assignment operations (overloading)
+	Proxy& operator=(const Proxy& other_);
+
+	//s1[2] = 'a' → oper=(s1[2], 'a') → oper=((oper[](s1, 2)), 'a')
+	Proxy& operator=(const char c); //
+
+	// implicit conversion operator (cout<<s[3])
+	operator char() const;
+
+private:
+	RCString& m_rcstring;
+	size_t m_pos;
+};
 }
 
-#endif /* ifndef __RCSTRING_H__*/
+#endif /* ifndef __RCSTRING_H__ */
