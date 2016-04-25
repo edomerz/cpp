@@ -72,6 +72,7 @@ size_t RCString::GetRefCount() const
 }
 void RCString::SetChar(size_t pos_, const char c)
 {
+<<<<<<< HEAD
 	m_buf->m_string[pos_] = c;
 }
 
@@ -80,6 +81,13 @@ char RCString::GetChar(size_t pos_)
 	return(m_buf->m_string[pos_]);
 }
 
+=======
+
+}
+
+char RCString::GetChar(size_t pos_);
+
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 
 
 //input
@@ -120,9 +128,13 @@ RCString::Proxy::Proxy(const Proxy& other_): m_rcstring(other_.m_rcstring), m_po
 
 RCString::Proxy& RCString::Proxy::operator=(const char c)
 {
+<<<<<<< HEAD
 	m_buf->m_string.operator [](m_pos) = c;
 	return(*this);
 //	RCString::SetChar(m_pos, c);
+=======
+	RCString::SetChar(m_pos, c);
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 //	m_rcstring.DecRefBuf();
 //
 //	m_rcstring.m_buf = new Buffer(*m_rcstring.m_buf);

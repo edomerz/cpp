@@ -9,19 +9,25 @@ DESCRIPTION:
 
 #include <iostream> 
 #include <vector>
+<<<<<<< HEAD
 #include <algorithm>
+=======
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 
 namespace ilrd
 {
 static const size_t BITS_IN_WORD = 8 * sizeof(size_t);
 
 template <std::size_t SIZE>
+<<<<<<< HEAD
 class BitArray;
 
 template <size_t SIZE>
 std::ostream& operator<<(std::ostream& os, BitArray<SIZE>& ba);
 
 template <std::size_t SIZE>
+=======
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 class BitArray
 {
 private:
@@ -43,7 +49,10 @@ public:
 	Proxy operator[](std::size_t idx_);
 	bool operator[](std::size_t idx_) const;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 	BitArray& operator|=(const BitArray& other_);
 	BitArray& operator^=(const BitArray& other_);
 	BitArray& operator&=(const BitArray& other_);
@@ -55,11 +64,16 @@ public:
 private:
 	static const size_t NUM_CHUNKS = SIZE / (BITS_IN_WORD) + (SIZE % (BITS_IN_WORD));
 	std::vector<size_t> m_bit_arr;
+<<<<<<< HEAD
 
 	friend std::ostream& operator<< <SIZE>(std::ostream& os, BitArray<SIZE>& ba);
 };
 
 /* ******************* struct Proxy ********************************/
+=======
+};
+
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 template<std::size_t SIZE>
 struct BitArray<SIZE>::Proxy
 {
@@ -69,16 +83,24 @@ struct BitArray<SIZE>::Proxy
 	Proxy& operator=(bool b_);
 	operator bool();
 
+<<<<<<< HEAD
 	BitArray& m_v_ref;
 	size_t m_idx;
 };
 
 
 // ctor
+=======
+	BitArray& v_ref;
+	size_t m_idx;
+};
+
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 template<std::size_t SIZE>
 BitArray<SIZE>::BitArray(): m_bit_arr(NUM_CHUNKS)
 {
 	std::cout << " in Ctor! " << "	NUM_CHUNKS: " << NUM_CHUNKS << "\n";
+<<<<<<< HEAD
 }
 
 template<std::size_t SIZE>
@@ -165,10 +187,15 @@ template<std::size_t SIZE>
 bool BitArray<SIZE>::operator!=(const BitArray& other_) const
 {
 	return(m_bit_arr != other_.m_bit_arr);
+=======
+
+	std::cout << "debug: sizeof(m_bit_arr): " << sizeof(m_bit_arr) << std::endl;
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 }
 
 
 template<std::size_t SIZE>
+<<<<<<< HEAD
 bool BitArray<SIZE>	::operator[](std::size_t idx_) const
 {
 	return(this->GetBit(idx_));
@@ -236,4 +263,29 @@ BitArray<SIZE>::Proxy::operator bool()
 }
 
 }
+=======
+void BitArray<SIZE>::SetBit(std::size_t idx_, bool val_)
+{
+	m_bit_arr[idx_] = val_;
+}
+//bool GetBit(std::size_t idx_) const;
+//void FlipBit(std::size_t idx_);
+//void FlipAllBits();
+//std::size_t CountTrueBits() const;
+//
+//bool operator==(const BitArray& other_) const;
+//bool operator!=(const BitArray& other_) const;
+//
+//Proxy operator[](std::size_t idx_);
+//bool operator[](std::size_t idx_) const;
+//
+//BitArray& operator|=(const BitArray& other_);
+//BitArray& operator^=(const BitArray& other_);
+//BitArray& operator&=(const BitArray& other_);
+//
+//BitArray& operator<<=(std::size_t num_bits);
+//BitArray& operator>>=(std::size_t num_bits);
+}
+
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 #endif /* ifndef __BITARRAY_H__*/

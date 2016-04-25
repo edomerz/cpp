@@ -6,14 +6,18 @@ using namespace ilrd;
 
 int main(void)
 {
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 	printf("\n[FILE:%s][func:%s][LINE:%d]%s:\n", __FILE__, __func__, __LINE__, "Create1"); /* DEBUG!!! */
 	BitArray<1> ba1;
 	std::cout << "\nsizeof(ba1): " << sizeof(ba1)<< std::endl;
 	
 	printf("\n[FILE:%s][func:%s][LINE:%d]%s:\n", __FILE__, __func__, __LINE__, "Create2"); /* DEBUG!!! */
 	BitArray<65> ba2;
+<<<<<<< HEAD
 //	std::cout << ba2;
 //	ba2.FlipAllBits();
 //	std::cout << ba2;
@@ -128,6 +132,12 @@ int main(void)
 	ba2.FlipAllBits();
 	std::cout << "ba2: \n" << ba2;
 
+=======
+
+	std::cout << "\nsizeof(ba2): " << sizeof(ba2)<< std::endl;
+
+//	ba1 = 1;
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 
 	return(0);
 }

@@ -26,7 +26,10 @@ public:
 	~RCString();
 
 	//copy behavior
+<<<<<<< HEAD
 	// CCtor
+=======
+>>>>>>> e2c48ad8ccd6dea1560bb8ba23c5a911d98773a9
 	RCString(const RCString& other_);
 	RCString& operator=(const RCString& other_);
 
