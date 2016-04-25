@@ -10,8 +10,26 @@ int main(int argc, char* argv[], char** envp)
 	Component* dir = CreateRepository(".");
 
 	std::cout <<"\n*********************************************************\n\n";
-	dir->Display(0);
+	dir->Display();
 
+
+	std::cout <<"\n*********************************************************\n\n";
+
+	const Component* ret = FindPath(dir, ".");
+
+	ret->Display();
+
+	std::cout <<"\n*********************************************************\n\n";
+
+	const Component* ret2 = FindPath(dir, "./tmp2");
+
+	ret2->Display();
+
+	std::cout <<"\n*********************************************************\n\n";
+
+	const Component* ret3 = FindPath(dir, "./tmp1");
+
+	ret3->Display();
 
 	delete dir;
 

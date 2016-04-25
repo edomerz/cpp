@@ -25,10 +25,10 @@ public:
 	Component(const std::string& name_);
 	virtual ~Component();
 
-	virtual void Display(int level = 0) const = 0;
+	virtual void Display(int level = -1) const = 0;
 	
 	const std::string& GetName() const;
-	
+	virtual const Component* Find(const std::string& path_) const = 0;
 
 private:
 	std::string m_name;
@@ -41,9 +41,9 @@ public:
 	Directory(const std::string& name_);
 	~Directory();
 
-	void Display(int level = 0) const;
+	void Display(int level = -1) const;
 	void Add(Component* inst_);
-	void Find(std::string& path_) const;
+	const Component* Find(const std::string& path_) const;
 
 private:
 	std::vector<Component*> v;
@@ -58,14 +58,14 @@ public:
 	~File();
 
 	void Display(int level = 0) const;
-	void Find(std::string& path_) const;
+	const Component* Find(const std::string& path_) const;
 
 };
 
 /***************************************************************************/
 
 Component* CreateRepository(const std::string& path_);
-Component* FindPath(Component* repo_, const std::string& path_);
+const Component* FindPath(Component* repo_, const std::string& path_);
 
 }
 

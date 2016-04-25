@@ -16,12 +16,7 @@ const std::string& Component::GetName() const
 	return(m_name);
 }
 
-
-
-
-
-
-/********************************** Dirctory ********************************/
+/********************************** Directory ********************************/
 
 Directory::Directory(const std::string& name_): Component(name_), v(0ul, 0)
 {}
@@ -37,7 +32,7 @@ Directory::~Directory()
 void Directory::Display(int level) const
 {
 	++level;
-	std::cout << std::string(level, '-') << GetName() << std::endl;
+	std::cout << std::string(level, '-') << "[Dir]" << GetName() << std::endl;
 
 	for(int i = 0, v_size = v.size(); i < v_size; ++i)
 	{
@@ -50,6 +45,31 @@ void Directory::Add(Component* inst_)
 	v.push_back(inst_);
 }
 
+const Component* Directory::Find(const std::string& path_) const
+{
+	const Component* ret = NULL;
+	const std::string& tmp = GetName();
+	if(tmp.length() == path_.length())
+	{
+		if(!tmp.compare(path_))
+		{
+			return(this);
+		}
+
+	}
+	else if(GetName().compare(0ul, GetName().length(), path_))
+	{
+		for(int i = 0, v_size = v.size(); i < v_size; ++i)
+		{
+			if((ret = v[i]->Find(path_)))
+			{
+				return(ret);
+			}
+		}
+	}
+
+	return(ret);
+}
 
 /************************************ File **********************************/
 
@@ -61,12 +81,17 @@ File::~File()
 
 void File::Display(int level) const
 {
-	std::cout << std::string(level, '-') << GetName() << std::endl;
+	std::cout << std::string(level, '-') << "[File]" << GetName() << std::endl;
 }
 
-void File::Find(std::string& path_) const
+const Component* File::Find(const std::string& path_) const
 {
-
+	if(!path_.compare(GetName()))
+	{
+		std::cout << GetName() << std::endl;
+		return(this);
+	}
+	return(NULL);
 }
 
 
@@ -115,11 +140,14 @@ Component* CreateRepository(const std::string& path_)
     return(dir);
 }
 
-Component* FindPath(Component* repo_, const std::string& path_)
+const Component* FindPath(Component* repo_, const std::string& path_)
 {
 
-	Component* tmp = repo_;
-	tmp->Display();
+	const Component* tmp = NULL;
+	if(!path_.compare(0ul, repo_->GetName().length(), repo_->GetName()))
+	{
+		tmp = repo_->Find(path_);
+	}
 
 	return(tmp);
 }
