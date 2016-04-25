@@ -69,7 +69,7 @@ struct BitArray<SIZE>::Proxy
 	Proxy& operator=(bool b_);
 	operator bool();
 
-	BitArray& v_ref;
+	BitArray& m_v_ref;
 	size_t m_idx;
 };
 
@@ -166,8 +166,7 @@ bool BitArray<SIZE>::operator!=(const BitArray& other_) const
 {
 	return(m_bit_arr != other_.m_bit_arr);
 }
-//
-//Proxy operator[](std::size_t idx_);
+
 
 template<std::size_t SIZE>
 bool BitArray<SIZE>	::operator[](std::size_t idx_) const
@@ -214,7 +213,8 @@ BitArray<SIZE>& BitArray<SIZE>::operator&=(const BitArray& other_)
 
 /* ******************* struct Proxy ********************************/
 template<std::size_t SIZE>
-BitArray<SIZE>::Proxy::Proxy(BitArray& bit_arr, std::size_t idx): v_ref(bit_arr), m_idx(idx)
+BitArray<SIZE>::Proxy::Proxy(BitArray& bit_arr, std::size_t idx):
+								m_v_ref(bit_arr), m_idx(idx)
 {}
 template<std::size_t SIZE>
 BitArray<SIZE>::Proxy& BitArray<SIZE>::Proxy::operator=(const Proxy& other_)
@@ -224,13 +224,15 @@ BitArray<SIZE>::Proxy& BitArray<SIZE>::Proxy::operator=(const Proxy& other_)
 template<std::size_t SIZE>
 BitArray<SIZE>::Proxy& BitArray<SIZE>::Proxy::operator=(bool b_)
 {
-	this->v_ref[m_idx] = b;
+	m_v_ref.SetBit(m_idx, b_);
+//	this->m_v_ref[m_idx] = b;
+	return(*this);
 }
 
 template<std::size_t SIZE>
-bool BitArray<SIZE>::operator bool()
+BitArray<SIZE>::Proxy::operator bool()
 {
-
+	return(m_v_ref.GetBit(m_idx));
 }
 
 }

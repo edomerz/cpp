@@ -1,0 +1,12 @@
+/****************************************************************************
+	scopelock
+AUTHOR: omer ido                                                  
+CREATE DATE: 18/04/16                                              			
+DESCRIPTION: 
+**************************************************************************/
+#ifndef __SCOPELOCK_H__
+#define __SCOPELOCK_H__
+
+#include <iostream> 
+	
+#endif /* ifndef __SCOPELOCK_H__*/

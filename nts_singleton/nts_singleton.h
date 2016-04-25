@@ -49,23 +49,29 @@ public:
 	{
 		if(! m_instance) // check if NULL, if so, create single Singleton
 		{
-			m_instance = new Singleton;
-			return m_instance;
+			m_instance = new T;
+			atexit(&Clean);
 		}
+		return *m_instance;
 	}
 	static void Clean()
 	{
 		delete m_instance;
-		m_instance = 0xdeadbeef;
+		m_instance = reinterpret_cast<T*>(0xdeadbeef);
 	}
 private:
-	static Singleton* m_instance;
+	static T* m_instance;
 
 	explicit Singleton();
-	Singleton(const Singleton& other_);
-	Singleton& operator=(const Singleton& other_);
-	~Singleton();
+	//  Singleton(const Singleton& other_); 			// no need
+	//  Singleton& operator=(const Singleton& other_);
+	//	~Singleton();
 };
+
+template<typename T>
+T* nts_singleton<T>::m_instance; 	// weak symbol, init to 0 in the data
+								 	// segment. if init, it becomes strong symbol. 
+
 
 class Log
 {

@@ -1,0 +1,24 @@
+scoped locking A.K.A  synchronized block, object construction is resource acquisition
+
+c++ idiom ensures that a lock acuired when control enters a scope and realeased automatically
+when control leaves the scope.
+
+problem: properly acquire and release a lock on a critical section.
+
+solution: define a guard class whose ctor automatically acquires a lock,
+and a dtor releases the lock when leaving that scope.
+
+benefits: 2:
+1) increased robustness, auto acquire/ released
+2) decreased maintenance, usage of parameterizes types or polymorphism is straightforward
+
+liabilities: there are 2:
+1) deadlock when used recursively whithout a recursive mutex
+2) may not be integrated with the os system calls, therefore locks may
+not be released auto when processes or threads are aborted/ exits for instance:
+thread_exit(); // this system call does not call the dtor,
+a general rule, use an exception handling maechanism.
+
+
+
+

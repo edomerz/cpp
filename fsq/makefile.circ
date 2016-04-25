@@ -1,0 +1,13 @@
+CC=clang++
+CFLAGS=-g -std=c++98 -Wall -Werror -pedantic -D_DEBUG -I .
+DEPS = circ_buf.h
+OBJ = circ_buf.o circ_buf_test.o
+
+all: circ_buf_test
+	
+
+%.o: %.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+circ_buf_test: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)

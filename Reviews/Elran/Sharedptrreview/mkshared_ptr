@@ -1,0 +1,5 @@
+
+CFLAGS=-std=c++98 -ansi -Wall -pedantic -Werror -D_DEBUG -g
+
+shared_ptr: shared_ptr_test.cpp shared_ptr.cpp shared_ptr.h
+	g++ $(CFLAGS) -o shared_ptr shared_ptr_test.cpp shared_ptr.cpp 

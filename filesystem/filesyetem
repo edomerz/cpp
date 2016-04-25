@@ -1,0 +1,32 @@
+fullstack@1104-fs01:~$ cat /proc/mtd
+cat: /proc/mtd: No such file or directory
+fullstack@1104-fs01:~$ sudo !!
+sudo cat /proc/mtd
+sudo: unable to resolve host 1104-fs01
+[sudo] password for fullstack: 
+cat: /proc/mtd: No such file or directory
+fullstack@1104-fs01:~$ sudo mkfs.ext2 /dev/ram1
+sudo: unable to resolve host 1104-fs01
+mke2fs 1.42.9 (4-Feb-2014)
+Discarding device blocks: done                            
+Filesystem label=
+OS type: Linux
+Block size=1024 (log=0)
+Fragment size=1024 (log=0)
+Stride=0 blocks, Stripe width=0 blocks
+16384 inodes, 65536 blocks
+3276 blocks (5.00%) reserved for the super user
+First data block=1
+Maximum filesystem blocks=67108864
+8 block groups
+8192 blocks per group, 8192 fragments per group
+2048 inodes per group
+Superblock backups stored on blocks: 
+	8193, 24577, 40961, 57345
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Writing superblocks and filesystem accounting information: done
+
+
+
