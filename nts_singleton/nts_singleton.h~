@@ -69,8 +69,8 @@ private:
 };
 
 template<typename T>
-T* nts_singleton<T>::m_instance; // weak symbol, init to 0 in the data
-// segment. if init, it becomes strong symbol. 
+T* nts_singleton<T>::m_instance; 	// weak symbol, init to 0 in the data
+								 	// segment. if init, it becomes strong symbol. 
 
 
 class Log

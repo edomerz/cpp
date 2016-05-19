@@ -1,0 +1,50 @@
+NSBD and Software Distribution 
+by Dave Dykstra and Katherine Lato
+
+ 
+Example 1:  
+
+packages:
+  nsbd
+    nsbUrl:
+      http://www.bell-labs.com/nsbd/nsbd.nsb
+    maintainers:
+      Dave Dykstra <dwd@bell-labs.com>
+    executableTypes:
+      sparc-sun-solaris
+    validPaths:
+      bin/nsbd
+      lib/nsbd/
+      man/man1/nsbd.1
+
+
+Listing One 
+# every .npd file has to begin with the following line
+nsbPackageDescription: 1
+# PGP user ids of authorized package maintainers
+maintainers:
+  Dave Dykstra &lt;dwd@bell-labs.com&gt;
+    # where to get PGP public key if user doesn't have it
+    pgpKeyUrl: http://www.bell-labs.com/user/dwd/dwdpgpkey.txt
+# binary types supported in this package
+executableTypes: sparc-sun-solaris,mips-sgi-irix
+# URL of the '.nsb' file; %P is package name
+nsbUrl: http://www.bell-labs.com/project/nsbd/%P.nsb
+# URL where all 'paths' in package can be found
+topUrl: http://www.bell-labs.com/project/nsbd/binaries
+# regular expression substitutions when installing
+regSubs:
+  # delete all .%E suffixes when installing
+  .%E$
+# file paths to include in package
+paths:
+  # %E expands to every executableType
+  bin/nsbd.%E
+  # recursively picks up all files in directories
+  lib/nsbd/
+  man/man1/nsbd.1
+
+
+
+
+1

@@ -1,0 +1,46 @@
+Java Q&A
+by Mukul Sood
+
+
+Listing One
+try {
+    UIManager.setLookAndFeel (
+        "com.sun.java.swing.jlf.JLFLookAndFeel");
+} catch( java.lang.ClassNotFoundException e) {
+    // look and feel class not found, can't change l&f
+}
+
+Listing Two
+public abstract void setValueAt(Object aValue, int rowIndex, int columnIndex)
+
+Listing Three
+Component getTableCellRendererComponent(JTable table, 
+                 Object valueToBeDisplayed, boolean whetherCellSelected,
+                 int rowNumber, int columnNumber) 
+
+Listing Four
+  class ButtonRenderer extends JButton implements TableCellRenderer {
+          Component   getTableCellRendererComponent(JTable table, 
+               Object valueToBeDisplayed, boolean whetherCellSelected,
+               int rowNumber, int columnNumber) {
+if(valueToBeDisplayed == "red") {
+    this.setBackground = Color.red;
+} else {
+     this.setBackground = Color.white;
+}
+                    return this;
+            }
+    }
+
+Listing Five
+  public boolean isCellEditable(int row, int col) {
+    return true;
+}
+
+Listing Six
+        rowIndex = table.rowAtPoint(mouseEvent.getPoint());
+        colIndex = table.columnAtPoint(mouseEvent.getPoint());
+        dataModel.getValueAt(rowIndex, colIndex); 
+
+
+1

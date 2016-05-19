@@ -1,0 +1,13 @@
+#include <netinet/in.h>
+
+#include "tcpstream.h"
+
+class TCPConnector
+{
+public:
+	// generated ctor and dtor
+	
+	TCPStream* Connect(int port, const char* server);
+private:
+	int resolveHost(const char* host, struct in_addr* addr);
+};

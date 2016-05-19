@@ -1,0 +1,30 @@
+
+------ Shared Memory Segments --------
+key        shmid      owner      perms      bytes      nattch     status      
+0x00000000 1343488    fullstack  600        524288     2          dest         
+0x00000000 393217     fullstack  600        524288     2          dest         
+0x00000000 425986     fullstack  600        524288     2          dest         
+0x00000000 688131     fullstack  600        524288     2          dest         
+0x00000000 786436     fullstack  600        524288     2          dest         
+0x00000000 1507333    fullstack  600        524288     2          dest         
+0x00000000 917510     fullstack  600        16777216   2          dest         
+0x00000000 983047     fullstack  600        2097152    2          dest         
+0x00000000 1081352    fullstack  600        524288     2          dest         
+0x00000000 1245193    fullstack  600        524288     2          dest         
+0x00000000 6127626    fullstack  600        2097152    2          dest         
+0x00000000 6225931    fullstack  700        4583520    2          dest         
+0x00000000 6258700    fullstack  600        393216     2          dest         
+0x00000000 6291469    fullstack  600        524288     2          dest         
+0x00000000 1998863    fullstack  600        2097152    2          dest         
+0x00000000 3244048    fullstack  600        524288     2          dest         
+0x00000000 2424849    fullstack  600        393216     2          dest         
+0x00000000 2457618    fullstack  600        524288     2          dest         
+0x00000000 3145747    fullstack  700        4362832    2          dest         
+0x00000000 3342356    fullstack  600        4194304    2          dest         
+0x00000000 3375125    fullstack  600        8388608    2          dest         
+0x00000000 3473430    fullstack  600        524288     2          dest         
+0x00000000 4358168    fullstack  600        524288     2          dest         
+0x00000000 4390938    fullstack  600        1048576    2          dest         
+0x00000000 6815772    fullstack  600        524288     2          dest         
+0x00000000 6848541    fullstack  600        2097152    2          dest         
+

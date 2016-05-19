@@ -1,0 +1,85 @@
+Algorithm Alley
+by John C. Gunther
+
+Listing One
+ewInitialize(ew, alpha, firstData) {
+  assert(0 <= alpha < 1)
+  ew.alpha = alpha
+  ew.average = firstData
+}
+ewUpdate(ew, newData) {  
+  ew.average = ew.alpha*ew.average + (1-ew.alpha)*newData
+}
+
+Listing Two
+ewInitialize(ew, alpha) {
+  assert(0 <= alpha < 1)  
+  ew.previousTime =  - INFINITY 
+  ew.alpha = alpha
+}
+ewUpdate(ew, newData, time) {  
+  weightReductionFactor  =  ew.alpha^(time - ew.previousTime)
+  newDataWeight = 1 - weightReductionFactor
+  ew.previousTime = time
+
+  ew.average = weightReductionFactor * ew.average + newDataWeight*newData
+}
+
+
+Listing Three
+ewInitialize(ew, alpha) {
+  assert(0 <= alpha < 1)  
+  ew.sumOfWeights = 0
+  ew.sumOfData = 0
+  ew.previousTime =  - INFINITY 
+  ew.alpha = alpha
+  ew.newDataWeightUpperBound = 1 - alpha
+}
+ewUpdate(ew, newData, time) {  
+  assert (time > ew.previousTime)
+  weightReductionFactor  =  ew.alpha^(time - ew.previousTime)
+  newDataWeight = min(1 - weightReductionFactor, ew.newDataWeightUpperBound)
+  ew.previousTime = time
+
+  ew.sumOfWeights = weightReductionFactor* ew.sumOfWeights + newDataWeight
+  ew.sumOfData = weightReductionFactor * ew.sumOfData + newDataWeight*newData
+
+  ew.average = ew.sumOfData / ew.sumOfWeights
+}
+
+Listing Four
+ewInitialize(ew, alpha, maxDt) {
+  assert(0 <= alpha < 1)  
+  assert(maxDt > 0)
+  ew.sumOfWeights = 0
+  ew.sumOfData = 0
+  ew.sumOfSquaredData = 0  
+  ew.previousTime =  - INFINITY 
+  ew.alpha = alpha
+  ew.newDataWeightUpperBound = 1 - alpha^maxDt 
+}
+ewUpdate(ew, newData, time) {  
+  assert (time > ew.previousTime)
+  weightReductionFactor  =  ew.alpha^(time - ew.previousTime)
+  newDataWeight = min(1 - weightReductionFactor, ew.newDataWeightUpperBound)
+  ew.sumOfWeights = weightReductionFactor* ew.sumOfWeights + newDataWeight
+  ew.sumOfData = weightReductionFactor * ew.sumOfData + newDataWeight*newData
+  ew.sumOfSquaredData = 
+      weightReductionFactor* ew.sumOfSquaredData + newDataWeight*newData^2
+  ew.previousTime = time
+}
+ewCompletenessFraction(ew, time) { 
+  assert (time >= ew.previousTime)
+  return(ew.alpha^(time - ew.previousTime) * ew.sumOfWeights) 
+}
+ewAverage(ew) {
+  assert (ew.sumOfWeights > 0)
+  return(ew.sumOfData/ew.sumOfWeights) 
+}
+ewStdDev(ew) {       
+  assert (ew.sumOfWeights > 0)
+  return(Sqrt(ew.sumOfSquaredData/ew.sumOfWeights  - ewAverage(ew)^2))
+}
+
+
+2

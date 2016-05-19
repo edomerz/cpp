@@ -49,15 +49,16 @@ const Component* Directory::Find(const std::string& path_) const
 {
 	const Component* ret = NULL;
 	const std::string& tmp = GetName();
-	if(tmp.length() == path_.length())
+//	if(tmp.length() == path_.length())
+//	{
+	if(!tmp.compare(path_))
 	{
-		if(!tmp.compare(path_))
-		{
-			return(this);
-		}
-
+		return(this);
 	}
-	else if(GetName().compare(0ul, GetName().length(), path_))
+
+//	}
+//
+	if(tmp.compare(0ul, tmp.length(), path_))
 	{
 		for(int i = 0, v_size = v.size(); i < v_size; ++i)
 		{

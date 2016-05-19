@@ -1,0 +1,90 @@
+Voice Recording and Playback with ISDN
+by Martyn Davies
+
+Listing One
+WORD fsm[INPUTS][STATES]={
+//             IDLE  LISTEN ACTING  PROTB3  ACTB3I  CONN    DISCB3  DISC
+//              s0     s1     s2      s3      s4     s5       s6     s7
+//--------------------------------------------------------------------------
+/*KICKOFF  */{ s1+1,  s1+0,  s2+0,  s3+0,   s4+0,   s5+0,   s6+0,   s7+0,  },
+/*CONNI    */{ s0+0,  s2+9,  s2+0,  s3+0,   s4+0,   s5+0,   s6+0,   s7+0,  },
+/*CONNACTI */{ s0+0,  s1+0,  s3+2,  s3+0,   s4+0,   s5+0,   s6+0,   s7+0,  },
+/*CONNIB3  */{ s0+0,  s1+0,  s2+0,  s4+11,  s4+0,   s5+0,   s6+0,   s7+0,  },
+/*ALLACT   */{ s0+0,  s1+0,  s2+0,  s3+0,   s5+3,   s5+0,   s6+0,   s7+0,  },
+/*DISCI    */{ s0+0,  s1+0,  s0+12, s0+12,  s0+12,  s0+12,  s0+12,  s0+12, },
+/*DISCB3I  */{ s0+0,  s1+0,  s2+0,  s3+0,   s7+10,  s7+10,  s7+10,  s7+10, },
+/*TIMER    */{ s0+0,  s1+0,  s2+0,  s7+8,   s7+8,   s5+13,  s6+0,   s7+0,  },
+/*DATA_R   */{ s0+0,  s1+0,  s2+0,  s3+0,   s4+0,   s5+5,   s6+0,   s7+0,  },
+/*DATA_I   */{ s0+0,  s1+0,  s2+0,  s3+0,   s4+6,   s5+6,   s6+0,   s7+0,  },
+/*DISCRQ   */{ s0+0,  s1+0,  s2+0,  s3+0,   s6+7,   s6+7,   s7+8,   s7+0,  },
+                                             
+};
+
+Listing Two
+void ProcessFSM(int input, CAPI_MSG *msg)
+{
+  int newstate,oldstate;
+  int action,value;
+  
+  value = fsm[input][state];
+  newstate = GETSTATE(value);
+  action = GETACTION(value);
+
+  oldstate = state;
+  state = newstate;
+
+  switch(action){
+    case 0:     //NULL action
+      break;
+    case 1:    //LISTEN_REQ must be issued.
+      IssueListen();
+      break;
+      ...
+   default:
+     printf("FSM Error with ProcessFSM(%d) in state (%X)\n",input,oldstate);
+  }
+}
+
+Listing Three
+void ProcessCall(CAPI_MSG *msg)
+{
+  _CON_INDP *coni;
+  _CON_RESP *conr;
+  DWORD capi_error;
+  WORD cip;
+  BYTE *field, len, *bp;
+
+  coni = &msg->info.connect_ind;
+  cip = coni->CIP_Value;
+  switch(cip){
+     case 1:   printf("Incoming speech call\n"); break;
+     case 4:   printf("Incoming 3.1kHz audio call\n"); break;
+     case 16:  printf("Incoming Telephony call\n"); break;
+  default:;
+  }
+  //now find the Calling Party Number - this may be of interest to someone
+  field = &coni->structs[0];
+
+  printf("\tNumber Called ");
+  len = *field; 
+  if(len){
+     printf("= ");
+     PutNumber(len,field);   //Called party number
+     putchar('\n');
+  }else
+     printf("not available\n");
+  field += (len+1);         // step over Called Party Number
+
+  printf("\tCaller's Number ");
+  len = *field;
+  if(len){
+     printf("= ");
+     PutNumber(len,field);   //Calling party number
+     putchar('\n');        // step over Called Party Number
+  }else
+     printf("not available\n");
+  field += (len+1);
+
+
+
+2

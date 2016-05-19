@@ -1,0 +1,194 @@
+An API for Internet Auctions
+by Kevin O'Malley and Terence Kelly
+
+Example 1: 
+auth?name="my-name"&pw="my-pw" 
+auctioninfo?auctionid=7
+quit?
+
+Example 2: 
+(a)
+if ((SetupConnection(servname, port, sd)) < 0)
+{
+  (void)printf("error on SetupConnection()\n");
+  exit(EXIT_FAILURE);
+}
+
+(b)
+nBytes = WriteAPIString(sd, (char *)s, strlen(s));
+if (nBytes == 0)
+{
+  (void)printf("WriteAPIString returned 0 bytes, calling exit\n");
+  exit(EXIT_FAILURE);
+}
+
+(c)
+nBytes = ReadAPIString(sd, recvbuf, MAX_API_STRING_LEN);
+if (nBytes == 0)
+{
+  (void)printf("ReadAPIString returned 0 bytes, calling exit\n");
+  exit(EXIT_FAILURE);
+}
+
+
+Example 3: 
+(a)
+// recvBuf sent from the server = "auth?id=1234&status=0"
+APIStringData  msg(recvBuf);
+char *p = msg.Find("status");
+assert(p != NULL);
+char *p = msg.Find("id");
+assert(p != NULL);
+
+(b)
+APIStringMsg reply;
+reply.AddOpType("auth");
+reply.AddTerm("id", 1234);
+reply.AddTerm("status", NO_API_ERR);
+
+
+Table 1: 
+
+Function        Description
+
+auth             Authenticate a user with the server
+withdrawbid      Withdraw a bid
+submitbid        Submit a bid
+bidstatus        Get status information for a bid
+getquote         Get current price quotes of the target auction
+lastclearprice   Get last clearing price and time of target auction
+activeauctionid  Get active auction ids for current user
+auctioninfo      Get auction information for target auction
+bidid            Get bid ids for current user
+bidinfo          Get bid information for target bid id
+transid          Get transaction ids for current user
+parentid         Get parent catalog id for catalog key
+auctionidsfromcatkey   Get auction ids for catalog key
+catalogsubcatagories   Get catalog ids for a parent id
+transinfo        Get transaction information for target transaction id
+submitauction    Submit an auction
+userinfo         Get user information for current user
+catalogstring    Get catalog string for catalog id
+quit             Quit session
+search           Search database by auction name
+activebidid      Get active bid id for current user in a target auction
+servertime       Get current time from server
+transidforauction  Get transaction ids for target auction
+
+Listing One
+/*------------------------------------------------------------------
+  Program that connects to the server, sends strings to the 
+  server, and echos the server response.
+  Copyright (c) 1997-98 The Regents of the University of Michigan.
+  ------------------------------------------------------------------*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <signal.h>
+#include <time.h>
+
+#include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <assert.h>
+
+#include "String.H"
+#include "Sockets.H"
+#include "Utils.H"
+#include "APIStringData.H"
+#include "APIStringMsg.H"
+
+int
+main(int argc, char *argv[])
+{
+  int   port = 50001;
+  char *servname = (char *)"auction.eecs.umich.edu";
+  int  err = 0, sd = 0, nBytes = 0;
+  FILE *fp;
+  
+  if ((err = SetupConnection(servname, port, sd)) < 0)
+  {
+    (void)printf("error on SetupConnection()\n");
+    exit(EXIT_FAILURE); 
+  }
+  (void)printf("connected to address: %s\n", servname);
+  (void)printf("port:                 %d\n", port);
+  char s[MAX_API_STRING_LEN + 1];
+  char recvbuf[MAX_API_STRING_LEN + 1];
+
+  if (argc == 2)
+  {
+    fp = fopen(argv[1], "r");
+    if (fp == NULL)
+    {
+      printf("error opening input file\n");
+      return 0;
+    }
+    int cnt = 0;
+    while (!feof(fp))
+    {
+      s[0] = 0;
+      recvbuf[0] = 0;
+      
+      (void)fgets(s, MAX_API_STRING_LEN, fp);
+      if (strlen(s) <= 0)
+        break;
+      if (s[0] == '#')
+        continue;
+      (void)printf("-- (%d)\n%s", cnt++, s);
+      nBytes = WriteAPIString(sd, (char *)s, strlen(s));
+      if (nBytes == 0)
+      {        
+        (void)fprintf(stderr, "example: WriteAPIString returned 
+                                              0 bytes, calling exit(0)\n");
+        exit(EXIT_FAILURE); 
+      }
+      nBytes = ReadAPIString(sd, recvbuf, MAX_API_STRING_LEN);
+      if (nBytes == 0)
+      { 
+        (void)fprintf(stderr, "example: ReadAPIString returned 0 bytes, 
+                                                       calling exit(0)\n");
+        exit(EXIT_FAILURE); 
+      }
+      (void)printf("%s\n", recvbuf);
+    }
+    fclose(fp);
+  }
+  else
+  {
+    (void)printf("type API commands to send to the server\n");
+    while (1)
+    {
+      s[0] = 0;
+      recvbuf[0] = 0;
+      
+      (void)printf(": ");
+      (void)fgets(s, MAX_API_STRING_LEN, stdin);
+
+      nBytes = WriteAPIString(sd, (char *)s, strlen(s));
+      if (nBytes == 0)
+      {        
+        (void)printf("example: WriteAPIString returned 0 bytes, 
+                                                   calling _exit(0)\n");
+        exit(EXIT_FAILURE); 
+      }
+      nBytes = ReadAPIString(sd, recvbuf, MAX_API_STRING_LEN);
+      if (nBytes == 0)
+      { 
+        (void)printf("example: ReadAPIString returned 0 bytes, 
+                                                    calling _exit(0)\n");
+        exit(EXIT_FAILURE); 
+      }
+      (void)printf("%s\n", recvbuf);
+    }
+  }
+  return 0;
+}
+
+4

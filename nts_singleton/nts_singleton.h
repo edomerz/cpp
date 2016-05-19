@@ -54,11 +54,6 @@ public:
 		}
 		return *m_instance;
 	}
-	static void Clean()
-	{
-		delete m_instance;
-		m_instance = reinterpret_cast<T*>(0xdeadbeef);
-	}
 private:
 	static T* m_instance;
 
@@ -66,6 +61,12 @@ private:
 	//  Singleton(const Singleton& other_); 			// no need
 	//  Singleton& operator=(const Singleton& other_);
 	//	~Singleton();
+
+	static void Clean()
+	{
+		delete m_instance;
+		m_instance = reinterpret_cast<T*>(0xdeadbeef);
+	}
 };
 
 template<typename T>

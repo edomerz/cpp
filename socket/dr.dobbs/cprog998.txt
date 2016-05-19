@@ -1,0 +1,76 @@
+C Programming Column
+by Al Stevens
+
+
+
+Example 1: 
+(a)
+#include <windef.h>
+BOOL B = TRUE;
+bool b = B;     // warning
+
+(b) 
+#include <windef.h>
+void foo(BOOL b) { }
+void foo(bool b) { }
+void bar()
+{
+    foo(TRUE);
+    foo(true);
+}
+
+
+Example 2: 
+(a)
+for (int i = 0; i < 5; i++) {
+    // i is in scope
+}
+// i is no longer in scope
+
+(b)
+for (int i = 0; i < 5; i++) {
+    // ...
+}
+if (i == 5) // OK with old C++, error with Standard C++
+
+(c)
+int i;  // outer i
+if (abc)  {
+    for (int i = 0; i < 5; i++) {
+        // ...
+    }
+    if (i == 5) {   // inner i with old C++, outer i with Standard C++
+        // ...
+    }
+}
+
+Example 3: 
+(a)
+#include <new>
+char buffer[8192];
+// ...
+MyClass* pMC = new (buffer) MyClass; // new uses buffer, not heap
+
+(b)
+char buffer[8192];
+void* MyClass::operator new(size_t nSize, bool frbuffer)
+{
+    if (frbuffer)
+        return buffer;
+    return new char[nSize];
+}
+MyClass* pOC1 = new (true) MyClass; // new uses buffer, not heap
+MyClass* pOC2 = new (false) MyClass; // new uses heap, not buffer
+
+(c)
+void MyClass::operator delete(void* p, bool frbuffer)
+{
+    if (!frbuffer)
+        MyClass::operator delete(p);
+}
+
+(d)
+pOC1->~MyClass();
+operator delete(pOC1, true);
+
+2

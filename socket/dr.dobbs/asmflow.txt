@@ -1,0 +1,339 @@
+Assembly-Language Control-Flow Graphing
+by Edward J. Beroset
+
+Listing One
+;--------------------------------
+; bubble sort routine for Mitsubishi 740 series microprocessor
+; Entry: list = zero page pointer to unordered list of integers
+;              the first element in the list is the length
+; Exit: the list is sorted
+;-------------------------------- 
+sort:   ldx #0                  ; clear the "swapped" flag
+        lda (list,x)            ; fetch length
+        tay                     ; y = length of list
+loop    lda (list),y            ; a = list[y]
+        dey                     ; decrement index v'ble
+        beq finish              ; skip out if done with list
+        cmp (list),y            ; is list[y] > list[y-1] ?
+        bcs loop                ; if so, keep going
+        tax                     ; save list[y] in x reg
+        lda (list),y            ; fetch the other list element
+        iny                     ; increment pointer
+        sta (list),y            ; store the larger element
+        txa                     ; remember the smaller one
+        dey                     ; decrement pointer again
+        sta (list),y            ; store that element
+        ldx #1                  ; set the "swapped" flag
+        bra loop                ; loop back
+finish  txa                     ; were any elements exchanged?
+        bne sort                ; if so, go through the list again
+        rts                     ; otherwise we're done
+
+
+Listing Two
+#!/usr/bin/perl
+# This Perl program is designed to go through a number of source code files
+# and extract the following information:
+#   1.  labels
+#   2.  calls
+#   3.  jumps
+#   4.  conditional jumps
+# written on Thu  03-27-1997  by Edward J. Beroset
+#----------------------------------------------------------------------------
+use strict;
+
+my $showsubs = 1;
+
+my $file;
+foreach $file (@ARGV) {
+    &processFile($file);
+}
+#----------------------------------------------------------------------------
+# This subroutine processes each individual file
+#----------------------------------------------------------------------------
+sub processFile {
+    my $gotone;
+    my %nodeof;
+    my %jumplist;
+    my $outfile;
+    my ($label, $ujump, $cjump, $subcall, $subend);
+    my ($category, $modline, $destination, $targetlabel, $nodenum);
+    my $linenum  = 0;
+    my $recnum   = 1;
+    my @outrecords = ();
+    my $sourcefile = pop;
+
+    # open the input and output files.
+    # We create form the output filespec from the input filespec by
+    # changing the file extension from .asm to .ps
+
+    open SOURCEFILE, $sourcefile or die "Can't open $sourcefile: $!\n";
+    ($outfile = $sourcefile) =~ s/\.asm/\.ps/i;
+    open OUTFILE, ">$outfile"  or die "Can't open $outfile: $!\n";
+
+    # here are the regular expressions which describe how to identify
+    # the control elements in our assembly language source file
+
+    $label  = '^([a-zA-Z_]\w*):?[^=;\.]*(;|$)';
+    $ujump  = '^\w*\s*:?\s*[bjBJ][rmRM][apAP]\s+(\(?\\\\?\w+\)?)\W?';
+    $cjump  = '^\w*\s*:?\s*b[bcnepmvBCNEPMV][cseqliCSEQLI]\s+(\w*),?\s*([^,;
+                                                \t]*),?\s*(\\\\?[^,; \t]*)';
+    $subcall = '^\w*\s*:?\s*jsr\s+(\\\\?\w+\W)';
+    $subend  = '^\w*\s*:?\s*[rR][tT][iIsS]';
+
+    # iterate through every line of the source code file
+
+    while(<SOURCEFILE>) {
+        $linenum++;
+        chop;
+        $gotone = 0;
+        # find code label
+        if (/$label/o) {
+            $category = "T";
+            $nodeof{$1} = $recnum;  # add label to hash
+            $gotone = 1;
+        }
+        # find call
+        if (/$subcall/o) {
+            $category = "S";
+            $destination = $1;
+            $gotone = 1;
+        }
+        # find unconditional jump
+        if (/$ujump/o) {
+            $category = "U";
+            $destination = $1;
+            $gotone = 1;
+        }
+        # find conditional jumps
+        if (/$cjump/o) {
+            $category = "C";
+            if ($3) {
+                $destination = $3;
+            } elsif ($2) {
+                $destination = $2;
+            } else {
+                $destination = $1;
+            }
+            $gotone = 1;
+        }
+        # find subroutine ends
+        if (/$subend/o) {
+            $category = "R";
+            $gotone = 1;
+        }
+        # if we found a flow control item, add it to our lists
+        if ($gotone) {
+            # first, render the line printable by PostScript
+            # by replacing all single backslashes with double backslashes
+            ($modline = $_) =~ s/\\/\\\\/g;
+            # ... then replacing all left parens with backslash left paren
+            $modline =~ s/\(/\\\(/g;
+            # ... then replacing all right parens with backslash right paren
+            $modline =~ s/\)/\\\)/g;
+            if ($showsubs || ($category ne "S"))
+            {
+                # remember this record
+                push @outrecords, "$recnum ($linenum) ($modline) linelabel\n";
+
+                # if it's a neither an unconditional jump nor a return,
+                #  then there is a straight vertical line segment beneath
+                if (($category ne "U") && ($category ne "R")) {
+                     push @outrecords, "$recnum $recnum 1 add segment\n";
+                }
+                # if it's some kind of jump or call,
+                #   then remember that we'll need a curved line later
+                if (($category eq "C") || ($category eq "U") || 
+                                                   ($category eq "S")) {
+                    $jumplist{$recnum} = $destination;
+                }
+                $recnum++;
+            }
+        }
+    }
+    close(SOURCEFILE);
+    while (($nodenum, $targetlabel) = each %jumplist) {
+        if ($destination = $nodeof{$targetlabel}) {
+            push @outrecords, "$nodenum $destination sweep\n";
+        }
+        else {
+            push @outrecords, "($targetlabel) $nodenum deadend\n";
+        }
+    }
+    print OUTFILE << "EOM";
+%!PS-Adobe-2.0
+%%Creator:  diag1.pl version 1.0 Copyright 1997 Edward J. Beroset
+%%Title:  $outfile
+%%BoundingBox 0 0 612 792
+%%DocumentPaperSizes: Letter
+%%EndComments
+% ----- some definitions are in order...
+/inch { 72 mul } def
+
+/pagewidth 8.5 inch def
+/pageheight 11 inch def
+
+/sweepdict 3 dict def
+/x {2 inch} def
+
+/sweep
+{
+    sweepdict begin
+    /first  exch node def
+    /second exch node def
+    /bbox second first sub -2 div def
+    x first moveto
+    x bbox sub first x bbox sub second x second curveto
+    x first moveto
+    stroke
+    end
+} def
+/segment
+{
+    node x exch moveto
+    node x exch lineto
+    stroke
+} def
+/deadend
+{                           % (comment) n
+    node dup                % n' n'
+    x exch moveto           % n' x n' (moveto x n')
+    nodescalar x add exch   % nodescalar+x n'
+    lineto                  %
+    dup stringwidth         % (comment) wx wy
+    pop                     % (comment) wx
+    0.5 node -0.3 mul       % (comment) -wx -charheight
+    rmoveto show            % show that string
+    stroke                  %
+} def
+/linelabel
+{
+    % get ready to show comment
+    3 -1 roll node dup pagewidth 2 div exch moveto
+    exch show               % show the comment
+    0 exch moveto           % ready to show line number
+    show                    % show the line number
+} def
+/showtitle
+{
+    /Helvetica-Bold findfont
+    16 scalefont setfont
+    0 16 moveto
+    show
+    /Times-Roman findfont
+    -0.5 node scalefont
+    setfont
+} def
+
+% ------ main program begins
+1.0 inch pageheight 1.0 inch sub translate
+newpath
+
+/nodescalar { pageheight 2 inch sub -1 mul numnodes div } def
+/node { nodescalar mul } def
+
+% --- variable data starts here
+/numnodes $recnum def
+($sourcefile) showtitle
+@outrecords
+showpage
+EOM
+    close(OUTFILE);
+}
+
+Listing Three
+%!PS-Adobe-2.0
+%%Creator:  diag1.pl version 1.0 Copyright 1997 Edward J. Beroset
+%%Title:  bubble.ps
+%%BoundingBox 0 0 612 792
+%%DocumentPaperSizes: Letter
+%%EndComments
+% ----- some definitions are in order...
+/inch { 72 mul } def
+
+/pagewidth 8.5 inch def
+/pageheight 11 inch def
+/sweepdict 3 dict def
+/x {2 inch} def
+/sweep
+{
+    sweepdict begin
+    /first  exch node def
+    /second exch node def
+    /bbox second first sub -2 div def
+    x first moveto
+    x bbox sub first x bbox sub second x second curveto
+    x first moveto
+    stroke
+    end
+} def
+/segment
+{
+    node x exch moveto
+    node x exch lineto
+    stroke
+} def
+/deadend
+{                           % (comment) n
+    node dup                % n' n'
+    x exch moveto           % n' x n' (moveto x n')
+    nodescalar x add exch   % nodescalar+x n'
+    lineto                  %
+    dup stringwidth         % (comment) wx wy
+    pop                     % (comment) wx
+    0.5 node -0.3 mul       % (comment) -wx -charheight
+    rmoveto show            % show that string
+    stroke                  %
+} def
+/linelabel
+{
+    % get ready to show comment
+    3 -1 roll node dup pagewidth 2 div exch moveto
+    exch show               % show the comment
+    0 exch moveto           % ready to show line number
+    show                    % show the line number
+} def
+/showtitle
+{
+    /Helvetica-Bold findfont
+    16 scalefont setfont
+    0 16 moveto
+    show
+    /Times-Roman findfont
+    -0.5 node scalefont
+    setfont
+} def
+
+% ------ main program begins
+1.0 inch pageheight 1.0 inch sub translate
+newpath
+/nodescalar { pageheight 2 inch sub -1 mul numnodes div } def
+/node { nodescalar mul } def
+
+% --- variable data starts here
+/numnodes 9 def
+(bubble.asm) showtitle
+1 (14) (sort:   ldx #0          ; clear the "swapped" flag) linelabel
+ 1 1 1 add segment
+ 2 (17) (loop    lda \(list\),y     ; a = list[y]) linelabel
+ 2 2 1 add segment
+ 3 (19) (        beq finish     ; skip out if done with list) linelabel
+ 3 3 1 add segment
+ 4 (21) (        bcs loop       ; if so, keep going) linelabel
+ 4 4 1 add segment
+ 5 (30) (        bra loop       ; loop back) linelabel
+ 6 (31) (finish  txa            ; were any elements exchanged?) linelabel
+ 6 6 1 add segment
+ 7 (32) (        bne sort       ; if so, go through the list again) linelabel
+ 7 7 1 add segment
+ 8 (33) (        rts            ; otherwise we're done) linelabel
+ 3 6 sweep
+ 4 2 sweep
+ 5 2 sweep
+ 7 1 sweep
+
+showpage
+
+
+
+7

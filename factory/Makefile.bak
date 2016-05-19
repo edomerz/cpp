@@ -1,0 +1,13 @@
+CC=clang++
+CFLAGS=-g -std=c++98 -Wall -Werror -pedantic -D_DEBUG -I .
+DEPS = factory.h
+OBJ = factory.o factory_test.o
+
+all: factory_test
+	
+
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+factory_test: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)

@@ -1,0 +1,149 @@
+Channels for Inter-Applet Communication
+by Steve Ball and John Miller Crawford
+
+Listing One
+class Origin {
+    public void set(int value) { this.value = value; }
+    public int get() { return value; }
+
+    public final static int US = 0;
+    public final static int UK = 1;
+    public final static int NZ = 2;
+
+    private static int value = US;
+}
+
+Listing Two
+public class Scribble extends Applet {
+    public Scribble() {}
+    public void init() {
+        setBackground(Color.white);
+    }
+    public void paint(Graphics g) {
+        for (int i = 0; i < lines.size(); ++i)
+            drawLine(g, (Line) lines.elementAt(i));
+    }
+    public boolean mouseDown(Event evt, int x, int y) {
+        start = new Point(x, y);
+        return true;
+    }
+    public boolean mouseDrag(Event evt, int x, int y) {
+        Line line = new Line(start.x, 
+                          start.y, x, y, Palette.getPaletteColor());
+        lines.addElement(line);
+        drawLine(getGraphics(), line);
+        start = new Point(x, y);
+        return true;
+    }
+    private void drawLine(Graphics g, Line line) {
+        g.setColor(line.color);
+        for (int dx = -1; dx <= 1; ++dx)
+            for (int dy = -1; dy <= 1; ++dy)
+                g.drawLine(line.x1 + dx, line.y1 + dy, 
+                                    line.x2 + dx, line.y2 + dy);
+    }
+    private Vector lines = new Vector();
+    private Point start;
+}
+class Line extends Rectangle {
+    Line(int x1, int y1, int x2, int y2, Color color) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.color = color;
+    }
+    int x1, y1, x2, y2;
+    Color color;
+}
+public class Palette extends Applet implements Runnable {
+    public Palette() {}
+    public void init() {
+        size = size();
+    }
+    public void start() {
+        if (selector == null)
+            (selector = new Thread(this)).start();
+    }
+    public void stop() {
+        if (selector != null) {
+            selector.stop();
+            selector = null;
+        }
+    }
+    public void paint(Graphics g) {
+        synchronized (colorLock) {
+            for (int sqx = 0; sqx < NB_COLUMNS; ++sqx)
+                for (int sqy = 0; sqy < NB_ROWS; ++sqy)
+                    drawColorSquare(g, sqy * NB_COLUMNS + sqx);
+            updateSelection();
+        }
+    }
+    public boolean mouseDown(Event evt, int x, int y) {
+        int sqx = x * NB_COLUMNS / size.width;
+        int sqy = y * NB_ROWS / size.height;
+        if (sqx >= 0 && sqx < NB_COLUMNS && sqy >= 0 && sqy < NB_ROWS)
+            synchronized (colorLock) {
+                color = colors[colorIndex = sqy * NB_COLUMNS + sqx];
+                try {
+                    colorLock.notifyAll();
+                } catch (InterruptedException e) {
+                }
+            }
+        return true;
+    }
+    public void run() {
+        synchronized (colorLock) {
+            for (;;) {
+                updateSelection();
+                try {
+                    colorLock.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+    }
+    public static Color getPaletteColor() {return color;}
+    private void updateSelection() {
+      Graphics g=getGraphics();
+      drawColorSquare(g,selectedColor);            // remove old selection
+      drawColorSquare(g,selectedColor=colorIndex); // highlight new selection
+      g.dispose();
+    }
+    private void drawColorSquare(Graphics g, int index) {
+        // must synchronize on colorLock before calling this function
+        int sqx = index % NB_COLUMNS;
+        int sqy = index / NB_COLUMNS;
+        int x1 = sqx * size.width / NB_COLUMNS;
+        int x2 = (sqx + 1) * size.width / NB_COLUMNS;
+        int y1 = sqy * size.height / NB_ROWS;
+        int y2 = (sqy + 1) * size.height / NB_ROWS;
+
+        g.setColor(colors[index]);
+        g.fillRect(sqx * size.width / NB_COLUMNS, sqy * size.height / 
+                                             NB_ROWS, x2 - x1, y2 - y1);
+        g.setColor(index == colorIndex ? Color.white : Color.black);
+        g.drawRect(x1, y1, x2 - x1 - 1, y2 - y1 - 1);
+    }
+    private Dimension size;
+    private Thread selector;
+    private int selectedColor;
+    private static final int NB_COLUMNS = 18;
+    private static final int NB_ROWS = 12;
+    private static Color[] colors = new Color[216]; // const
+    private static Object colorLock = new Object();
+    private static Color color;
+    private static int colorIndex;  // index of color in colors array
+
+    static {
+        for (int i = 0; i < 216; ++i) {
+            int red = i / 36 * 0x33;
+            int green = i / 6 % 6 * 0x33;
+            int blue = i % 6 * 0x33;
+            colors[i] = new Color(red, green, blue);
+        }
+        color = colors[colorIndex = 0];
+    }
+}
+
+3

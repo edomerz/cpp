@@ -1,0 +1,159 @@
+The Windows CE 2.0 Remote API
+by Andrew Tucker
+
+
+
+Example 1:
+HRESULT STDAPICALLTYPE CeRapiInvoke(LPCWSTR lpwszDll, 
+                    LPCWSTR lpwszFunc,
+                    DWORD   dwInputCount,
+                    LPBYTE    pcbIn, 
+                    WORD      *pcbOutput,
+                    LPBYTE    *ppbOutput,
+                    IRAPIStream *ppStream,
+                    DWORD dwReserved)
+
+Example 2:
+HRESULT STDAPICALLTYPE RemoteFunc(DWORD  cbInput,
+                          BYTE       *pbInput,
+                          DWORD    *pcbOutput
+                          BYTE     **ppbOutput,
+                          IRAPIStream *pStream)
+
+Example 3:
+HRESULT SetRapiStat(RAPISTREAMFLAG Flag, DWORD dwValue) 
+HRESULT GetRapiStat(RAPISTREAMFLAG Flag, DWORD *pdwValue)
+
+
+Listing One
+#include <windows.h>
+/* This handles the overloaded return value from CeRapiInvoke. */
+
+BOOL CRI_Success(HRESULT hr)
+{
+    BOOL bOK = TRUE;
+    if ( hr == ERROR_FILE_NOT_FOUND         ||
+         hr == ERROR_CALL_NOT_IMPLEMENTED   ||
+         hr == ERROR_EXCEPTION_IN_SERVICE )
+    {
+        bOK = FALSE;
+    }
+    else
+        bOK = (SUCCEEDED(hr));
+    return bOK;
+}
+
+Listing Two
+#include <windows.h>
+#include <tchar.h>
+#include <rapi.h>
+
+#include "..\common.h"
+
+BOOL CALLBACK ModuleDlgProc(HWND hwndDlg, UINT uMsg, 
+                            WPARAM wParam, LPARAM lParam); 
+int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                            LPSTR lpCmdLine, int nCmdShow)
+{
+    RAPIINIT ri = { sizeof(RAPIINIT) };
+    if ( SUCCEEDED(CeRapiInitEx(&ri)) )
+    {
+        // wait for 15 seconds for the connection...
+        if ( (WaitForSingleObject(ri.heRapiInit, 15000) == WAIT_OBJECT_0) && 
+             SUCCEEDED(ri.hrRapiInit) )
+        {
+            HRESULT hr;
+            DWORD   dwBuf;
+            BYTE    *pbuf;
+            hr = CeRapiInvoke(_T("cridll.dll"), _T("GetLoadedModules"), 
+                                        0, NULL, &dwBuf, &pbuf, NULL, 0);
+            if ( CRI_Success(hr) )
+            {
+                if ( pbuf == NULL )
+                {
+                    MessageBox(NULL, _T("Loaded Module List"), _T("No 
+                               loaded modules found on device"), MB_OK);
+                }
+                else
+                {
+                    // display dialog and pass pointer to module list
+                    DialogBoxParam(hInstance,
+                                    MAKEINTRESOURCE(IDD_BLOCKDLG), NULL, 
+                                    (DLGPROC)ModuleDlgProc, (LPARAM)pbuf);
+                }
+                // free the memory allocated by the call to CeRapiInvoke
+                CeRapiFreeBuffer(pbuf);
+            }
+            else
+            {
+                MessageBox(NULL, L"CeRapiInvoke failed", 
+                                 L"CeRapiInvoke failed", MB_OK);
+            }
+        }
+        else
+        {
+            MessageBox(NULL, _T("CeRapiInitEx failed"), 
+                             _T("CeRapiInitEx failed"), MB_OK);
+        }
+        // have to call uninit even if the connection did not succeed
+        CeRapiUninit();
+    }
+    else
+    {
+        MessageBox(NULL, _T("CeRapiInitEx failed"), 
+                         _T("CeRapiInitEx failed"), MB_OK);
+    }
+    return 0;
+    if ( CeRapiInit() != E_FAIL )
+    {
+    }
+    else
+    {
+        MessageBox(NULL, L"CeRapiInit failed", L"CeRapiInit failed", MB_OK);
+    }
+    return 0;
+}
+// window function for the dialog box
+BOOL CALLBACK ModuleDlgProc(HWND hwndDlg, UINT uMsg, 
+                            WPARAM wParam, LPARAM lParam)
+{
+    BOOL    bRet = FALSE;
+    switch( uMsg )
+    {
+        case WM_INITDIALOG:
+        {
+            LPWSTR lpwszMods = (LPWSTR)lParam;
+            // parse modules from passed list and display in listbox
+            LPWSTR lpwsz = _tcstok(lpwszMods, _T("\n"));
+            while (lpwsz)
+            {
+                SendMessage(GetDlgItem(hwndDlg, IDC_MODLIST), 
+                            LB_ADDSTRING, 0, (LPARAM)lpwsz);
+                lpwsz = _tcstok(NULL, _T("\n"));
+            }
+        }
+        break;
+        case WM_COMMAND:
+        {
+            int     nID = LOWORD(wParam);
+            int     wNotify = HIWORD(wParam);
+            // handle click on OK or Cancel
+            if ( wNotify == BN_CLICKED )
+            {
+              switch( nID )
+              {
+                case IDCANCEL:
+                case IDOK:
+                    EndDialog(hwndDlg, nID);
+                    bRet = TRUE;
+                    break;
+              }
+            }
+        }
+        break;
+    }
+    return bRet;
+}
+
+
+4

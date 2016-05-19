@@ -1,0 +1,65 @@
+/****************************************************************************
+	singleton
+AUTHOR: omer ido                                                  
+CREATE DATE: 02/05/16                                              			
+DESCRIPTION: 
+**************************************************************************/
+#ifndef __SINGLETON_H__
+#define __SINGLETON_H__
+
+#include <iostream> 
+#include <cstdlib> 		// atexit
+
+namespace ilrd
+{
+
+template<typename T>
+class Singleton
+{
+public:
+	static T& GetIns();
+	
+	
+private:
+	static T* ins;
+	
+	explicit Singleton();
+	~Singleton();
+	Singleton(const Singleton& );
+	
+	static void Clean();
+
+}
+
+template<typename T>
+T* Singleton::ins = 0;
+
+template<typename T>
+static T& Singleton::GetIns()
+{
+	T* tmp = ins;
+	// memory barrier, hard sequence point.
+	if(!ins)	
+	{
+		//lock lock - only one will have accesses, and only for the first time
+		if(!ins)
+		{
+			tmp = new Singleton; // creates memory space, ctor a Singleton object, and make tmp point to that space
+			// another memory barrier as a hard sequence point, to make sure line 51 is finished
+			ins = tmp;
+		}
+		// unlock lock
+	}
+	return(tmp);
+}
+
+static void Singleton::Clean()
+{
+	delete ins;
+	ins = reinterpret_cast<T*>0xdeadbeef;
+}
+
+
+}
+	
+#endif /* ifndef __SINGLETON_H__*/

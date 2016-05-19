@@ -1,0 +1,9 @@
+1. singleton
+2. delayed initalization
+3. non 
+4. proper destruction order
+5. guarnteed destruction
+6. diagnostic if used 
+7. thread safe use atomic operator
+8. void fo(const myclass
+9. use at_exit 

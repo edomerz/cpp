@@ -1,0 +1,201 @@
+Asynchronous Communications Using select and poll
+by Sean Eric Fagan
+
+
+Example 1: 
+if (p->p_wchan == (caddr_t)&selwait) {
+  if (p->p_stat == SSLEEP)
+    setrunnable(p);
+  else
+    unsleep(p);
+} else if (p->p_flag & P_SELECT)
+  p->p_flag &= ~P_SELECT;
+
+Example 2: 
+struct procfs_event {
+  unsigned int   p_stops;    /* event bitmask */
+  unsigned int   p_stype;    /* What stopped the proc. */
+  char           p_step;     /* flag indicating proc is stopped */
+  unsigned char  p_pfsflags; /* procfs flags */
+  struct selinfo p_sel;	     /* for select/poll */
+};
+
+Example 3: 
+if (p->p_ev->p_sel.si_pid)
+  selwakeup(&p->p_ev->p_sel);
+
+Example 4: 
+(a)
+ioctl(fd, PIOCWAIT, &procfs_status);
+
+(b)
+ifds = process_fds; /* Copy because select modifies it */
+select(maxfd+1, &ifds, NULL, NULL, NULL);
+
+Listing One
+/* Simple select()-driven chat server */
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <err.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+main() {
+  struct protoent *tp = getprotobyname("tcp"); /* TCP protocol */
+  int serv_sock; /* Master socket for server */
+  fd_set ifds; /* Bitmap of active sockets */
+  int maxfd; /* Last active socket */
+  struct sockaddr_in sin;
+  char **hostnames;  /* Names of currently connected hosts */
+
+  /* Create a TCP socket */
+  if (tp == NULL) err(1, "Cannot get tcp protocol\n");
+  serv_sock = socket(PF_INET, SOCK_STREAM, tp->p_proto);
+  if (serv_sock < 0)
+    err(2, "Cannot create socket:  %s\n", strerror(errno));
+  /* Bind the socket to port 12345 */
+  memset(&sin, 0, sizeof(sin));
+  sin.sin_len = sizeof(sin);
+  sin.sin_family = PF_INET;
+  sin.sin_port = htons(12345);
+  sin.sin_addr.s_addr = htonl(INADDR_ANY);
+  if (bind(serv_sock, (struct sockaddr*)&sin, sizeof(sin)) < 0)
+    err(3, "Cannot bind socket:  %s\n", strerror(errno));
+  /* Allow incoming connections */
+  if (listen(serv_sock, 64) < 0)
+    err(3, "Cannot listen to socket:  %s\n", strerror(errno));
+  FD_ZERO(&ifds);
+  FD_SET(serv_sock, &ifds);
+  maxfd = serv_sock;
+  for (;;) {
+    int fd = -1; /* Current file descriptor (socket) with input */
+    int i;
+    struct timeval to = { 2, 0 }; /* 2 seconds, 0 microseconds */
+    /* Wait for input from anywhere */
+    fd_set tifds = ifds;
+    int numfds = select(maxfd+1, &tifds, NULL, NULL, &to);
+    if (numfds == -1) err(4, "Cannot select:  %s\n", strerror(errno));
+    if (numfds == 0) continue;
+    /* Find first connection with available input */
+    fd = -1;
+    for (i = 0; i <= maxfd; i++)
+      if (FD_ISSET(i, &tifds)) {
+        fd = i;
+        break;
+      }
+    if (fd == -1) err(5, "Oops");
+    if (fd == serv_sock) { /* New connection request */
+      struct sockaddr_in remote;
+      int len = sizeof(remote);
+      int rfd;
+      /* Accept the connection */
+      rfd = accept(serv_sock, (struct sockaddr*)&remote, &len);
+      if (rfd == -1) err(6, "Cannot accept:  %s\n", strerror(errno));
+      /* Add the new connection to file descriptors I watch */
+      FD_SET(rfd, &ifds);
+      if (hostnames && rfd < maxfd && hostnames[rfd]) {
+        free(hostnames[rfd]);
+        hostnames[rfd] = strdup(inet_ntoa(remote.sin_addr));
+      } else {
+        maxfd = rfd;
+        hostnames = realloc(hostnames, (maxfd+1)*sizeof(char*));
+        hostnames[rfd] = strdup(inet_ntoa(remote.sin_addr));
+      }
+    } else {  /* Input is from a chat participant */
+      char buf[80];
+      int count;
+      char *h = hostnames[fd];
+      /* Get the input */
+      count = read(fd, buf, sizeof(buf));
+      if (count == 0) FD_CLR(fd, &ifds);
+      else {
+        /* Relay it to every other participant */
+    int i;
+        for (i = 0; i <= maxfd; i++) {
+          if (FD_ISSET(i, &ifds) && i != serv_sock && i != fd) {
+            write(i, h, strlen(h));
+            write(i, ": ", 2);
+            write(i, buf, count);
+          }
+        }
+      }
+    }
+  }
+}
+
+Listing Two
+/* Excerpt from pipe_select() in /usr/src/sys/kern/sys_pipe.c */
+switch (which) {
+case FREAD:
+  if ( (rpipe->pipe_state & PIPE_DIRECTW) ||
+       (rpipe->pipe_buffer.cnt > 0) ||
+       (rpipe->pipe_state & PIPE_EOF)) {
+         return (1);
+  }
+  selrecord(p, &rpipe->pipe_sel);
+  rpipe->pipe_state |= PIPE_SEL;
+  break;
+case FWRITE:
+  if ((wpipe == NULL) ||
+      (wpipe->pipe_state & PIPE_EOF) ||
+      (((wpipe->pipe_state & PIPE_DIRECTW) == 0) &&
+       (wpipe->pipe_buffer.size - wpipe->pipe_buffer.cnt) >= PIPE_BUF)) {
+          return (1);
+  }
+  selrecord(p, &wpipe->pipe_sel);
+  wpipe->pipe_state |= PIPE_SEL;
+  break;
+case 0:
+  if ((rpipe->pipe_state & PIPE_EOF) ||
+      (wpipe == NULL) ||
+      (wpipe->pipe_state & PIPE_EOF)) {
+         return (1);
+  }
+  selrecord(p, &rpipe->pipe_sel);
+  rpipe->pipe_state |= PIPE_SEL;
+  break;
+}
+
+Listing Three
+/* Excerpt from file /usr/src/sys/miscfs/procfs/procfs_vnops.c */
+/* Implement poll for procfs -- not as featureful as it could be, but a start
+ * for now, it only checks for a process stopping via STOPEVENT().
+ */
+static int
+procfs_poll(ap)
+  struct vop_poll_args /* {
+    struct vnode *a_vp;
+    int a_events;
+    struct ucred *a_cred;
+    struct proc *a_p;
+  } */ *ap;
+{
+  struct pfsnode *pfs = VTOPFS(ap->a_vp);
+  struct proc *procp, *p;
+  int error;
+  p = ap->a_p;
+  procp = pfind(pfs->pfs_pid);
+  if (procp == NULL) {
+    return ENOTTY;
+  }
+  if (!CHECKIO(p, procp))
+    return EPERM;
+  if (!procp->p_ev) {
+    get_procfs_event(procp);
+  } else if (procp->p_ev->p_step) {
+    return (ap->a_events & (POLLRDNORM | POLLWRNORM));
+  }
+  selrecord(p, &procp->p_ev->p_sel);
+  return 0;
+}
+
+
+4

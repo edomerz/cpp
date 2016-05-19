@@ -1,0 +1,183 @@
+Dynamic Linking & Late Binding for Netware 
+by N. Thomas Creighton
+
+Listing One
+void (* pFoo) (void);
+int (* pBar) (int iParam);
+hDNL = LoadLibrary("SomeDNL");
+if (hDNL)
+{
+   pFoo = GetProcAddress("Foo");
+   pBar = GetProcAddress("Bar");
+}
+if (! pFoo || ! pBar)
+{
+   // handle error condition
+}
+pFoo(); // Call Foo in SomeDNL
+pBar(5);    // Call Bar in SomeDNL
+FreeLibrary(hDNL);
+
+
+Listing Two
+static void Foo (void)
+
+{
+ ...
+// Foo code goes here
+}
+static int Bar (int iParam)
+{
+ ... 
+// Bar code goes here
+}
+
+
+Listing Three
+#if 0
+  CATINHAT - Cat in the Hat (with apologies..)
+  This file:  catinhat.c
+  Project Files:
+     catinhat.c    -   Source code for catinhat.nlm
+     catinhat.nlm  -   Executable implementing the library manager tester
+  Purpose: To test the dynamic netware library mechanism
+  Created 21 November 1997 by N. Thomas Creighton.
+  Copyright (C) 1997 by Novonyx, Inc.  All rights reserved.
+#endif  // File header comments
+
+#include "dnlmgr.h"
+int main (int argc, char **argv)
+{
+   DNL_HDNL hThing1;
+   DNL_HDNL hThing2;
+   int (* pDoOneThing1) (int iFirst, int iSecond);
+   int (* pDoOneThing2) (int iFirst, int iSecond);
+   int (* pDoAnotherThing1) (int iFirst, int iSecond);
+   int (* pDoAnotherThing2) (int iFirst, int iSecond);
+   int iFoo;
+
+   hThing1 = LoadLibrary("thing1.dnl");
+   hThing2 = LoadLibrary("thing2.dnl");
+
+   printf("\n\nHello from the Cat in the Hat.");
+   printf("\n\nI need some help from Thing1 & 2...");
+
+   if (hThing1)
+   {
+      pDoOneThing1 = GetProcAddress(hThing1, "DoOneThing");
+      if (pDoOneThing1)
+  {
+      iFoo = pDoOneThing1(5, 6);
+      printf("\n\tpDoThing1(5, 6): %d", iFoo);
+  }
+  pDoAnotherThing1 = GetProcAddress(hThing1, "DoAnotherThing");
+  if (pDoAnotherThing1)
+  {
+     iFoo = pDoAnotherThing1(5, 6);
+     printf("\n\tpDoAnotherThing1(5, 6): %d", iFoo);
+  }
+}
+printf("\n\nThing2 does things backwards from Thing1...");
+
+if (hThing2)
+{
+    pDoOneThing2 = GetProcAddress(hThing2, "DoOneThing");
+    if (pDoOneThing2)
+    {
+       iFoo = pDoOneThing2(5, 6);
+       printf("\n\tpDoThing2(5, 6): %d", iFoo);
+    }
+    pDoAnotherThing2 = GetProcAddress(hThing2, "DoAnotherThing");
+    if (pDoAnotherThing2)
+    {
+       iFoo = pDoAnotherThing2(5, 6);
+       printf("\n\tpDoAnotherThing2(5, 6): %d", iFoo);
+     }
+  }
+  printf("\n\nUnload Thing2..");
+  FreeLibrary(hThing2);
+  printf("\nUnload Thing1..");
+  FreeLibrary(hThing1);
+  printf("\nGoodbye!");
+
+  return  0;
+}
+
+
+Listing Four
+#if 0
+   Thing1 - One thing to test dnlmgr
+   This file: thing1.cpp
+   Project Files:
+      thing1.c    -   Source code for thing1.nlm
+      dnltmpl.c   -   Source template for dealing with DNL stuff
+      thing1.dnl  -   Actual executable implementing the thing
+   Purpose: To test the dynamic library manager dnlmgr.
+   This file is the principle (or only) code source module for thing1.
+   Created 19 November 1997 by N. Thomas Creighton.
+   Copyright (C) 1997 by Novonyx, Inc.  All rights reserved.
+#endif  // File header comments
+
+// The following functions are what Thing1 do.
+int DoOneThing (int iFirst, int iSecond)
+{
+    // Return the product of iFirst and iSecond.
+    return  iFirst * iSecond;
+}   
+int DoAnotherThing (int iFirst, int iSecond)
+{
+    // Returns the difference of iFirst and iSecond.
+   return  iFirst - iSecond;
+}   
+// Following is the WorkerFunctionTable declaration from dnltmpl.c 
+// as modified for Thing1.
+static DNLFuncDesc WorkerFunctionTable [] =
+{
+   // Place an entry here for each function you want people to have access 
+   // to. If you don't want an ordinal, use 0. If a function is to have an 
+   // ordinal, it must be in the range 0x1 - 0x7FF.
+   // Just copy the example entry and adjust the values.
+
+   {"DoOneThing",      (void * (*) ())&DoOneThing,     1},
+   {"DoAnotherThing",  (void * (*) ())&DoAnotherThing, 2},
+};
+
+Listing Five
+#if 0
+   Thing2 - Another thing to test dnlmgr
+   This file: thing2.cpp
+   Project Files:
+      thing2.c    -   Source code for thing2.nlm
+      dnltmpl.c   -   Source template for dealing with DNL stuff
+      thing2.dnl  -   Actual executable implementing the thing
+   Purpose: To test the dynamic library manager dnlmgr.
+   This file is the principle (or only) code source module for thing1.
+   Created 26 November 1997 by N. Thomas Creighton.
+   Copyright (C) 1997 by Novonyx, Inc.  All rights reserved.
+#endif  // File header comments
+
+// The following functions are what Thing2 do.
+int DoOneThing (int iFirst, int iSecond)
+{
+    // Returns the difference of iFirst and iSecond.
+    return  iFirst - iSecond;
+}   
+int DoAnotherThing (int iFirst, int iSecond)
+{
+    // Returns the product of iFirst and iSecond.
+    return  iFirst * iSecond;
+}
+// Following is the declaration of WorkerFunctionTable in the 
+// dnltmpl.c used for Thing2.
+static DNLFuncDesc WorkerFunctionTable [] =
+{
+    // Place an entry here for each function you want people to have access 
+    // to. If you don't want an ordinal, use 0. If a function is to have 
+    // an ordinal, it must be in the range 0x1 - 0x7FF.
+    // Just copy the example entry and adjust the values.
+    {"DoOneThing",      (void * (*) ())&DoOneThing,     1},
+    {"DoAnotherThing",  (void * (*) ())&DoAnotherThing, 2},
+};
+
+
+4

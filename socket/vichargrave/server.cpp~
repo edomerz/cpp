@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "tcpacceptor.h"
+
+int main(int argc, char *argv[])
+{
+	if(argc < 2 || argc > 4)
+	{
+		printf("Usage: server <port> [<ip>]\n");
+		exit(1);
+	}
+	
+	TCPStream* stream = 0;
+	TCPAcceptor* acceptor = 0;
+	
+	if(argc == 3)
+	{
+		acceptor = new TCPAcceptor(atoi(argv[1]), argv[2]);
+	}
+	else
+	{
+		acceptor = new TCPAcceptor(atoi(argv[1]));
+	}
+	
+	if(acceptor->Start() == 0)
+	{
+		while(1)
+		{
+			stream = acceptor->Accept();
+			if(stream)
+			{
+				size_t len;
+				char line[256];
+				
+				while((len = stream->Recive(line, sizeof(line))) > 0)
+				{
+					line[len] = '\0';
+					printf("recieved - %s\n", line);
+					stream->Send(line, len);
+				}
+				delete stream;
+			}
+		}
+	}
+	perror("could not start the server");
+	exit(-1);
+}
